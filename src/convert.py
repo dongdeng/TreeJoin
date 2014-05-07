@@ -11,6 +11,7 @@ def convert(root):
 	for child_of_root in root:
 		convert(child_of_root)
 
-tree = ET.ElementTree(file='dblp-tiny.xml')
+tree = ET.ElementTree(file='dblp.xml')
 root = tree.getroot()
 convert(root)
+#print len(root)

@@ -2,6 +2,7 @@
 #include "tree.h"
 #include <vector>
 #include <cstring>
+#include <fstream>
 
 using namespace std;
 
@@ -17,6 +18,14 @@ int costFunc(const string &a, const string &b) {
 	if (a == b)
 		return 0;
 	return 1;	
+}
+
+string getPostorderedString(TreeNode *root) {
+	string ret = "";
+	for (auto & i : root->getChild())
+		ret.append(getPostorderedString(i) + "$");
+	ret.append(root->getLabel());
+	return ret;
 }
 
 int dfs(TreeNode *f1, TreeNode *f2, int **ans, int sum1, int sum2);
@@ -74,6 +83,15 @@ int dfs(TreeNode *f1, TreeNode *f2, int **ans, int sum1, int sum2) {
 	return ret;
 }
 
+void generatePostorderedString(TreeNode *root, char *filename) {
+	cout << "start generating postordered string" << endl;
+	ofstream fout(filename);
+	for (auto & i : root->getChild())
+		fout << getPostorderedString(i) << endl;
+	fout.close();
+	cout << "geneating finished" << endl;
+}
+
 int main(int argc, char **argv) {
 	if (argc < 3) {
 		cout << "Usage : " << endl;
@@ -86,5 +104,7 @@ int main(int argc, char **argv) {
 	TreeNode *f2 = new TreeNode();
 	f2->readFile(argv[2]);
 	cout << "reading finished" << endl;
-	cout << treeED(f1, f2) << endl;
+	//cout << treeED(f1, f2) << endl;
+
+	generatePostorderedString(f1, "strings.txt");
 }
