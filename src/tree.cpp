@@ -14,26 +14,28 @@ TreeNode::TreeNode(string label) {
 TreeNode::~TreeNode() {
 }
 
+TreeNode *TreeNode::read(ifstream &fin) {
+	string tag;
+	getline(fin, tag);
+	TreeNode *ret = new TreeNode(tag);
+	int n;
+	fin >> n;
+	getline(fin, tag);
+	for (int i = 0; i < n; ++i)
+		ret->insertChild(read(fin));
+	return ret;
+}
+
 void TreeNode::readFile(char *filename) {
 	ifstream fin(filename);
-	int n; //the number of roots
+	string tag;
+	getline(fin, tag);
+	setLabel(tag);
+	int n;
 	fin >> n;
-	for (int i = 0; i < n; ++i) {
-		int m; // the number of nodes of each tree
-		fin >> m;
-		vector<TreeNode*> temp;
-		for (int j = 0; j < m; ++j) {
-			string s;
-			fin >> s;
-			temp.push_back(new TreeNode(s));
-		}
-		for (int j = 0; j < m - 1; ++j) {
-			int x, y;
-			fin >> x >> y;
-			temp[x]->insertChild(temp[y]);
-		}
-		insertChild(temp[0]);
-	}
+	getline(fin, tag);
+	for (int i = 0; i < n; ++i)
+		insertChild(read(fin));
 }
 
 void TreeNode::setLabel(string label) {
@@ -69,6 +71,14 @@ TreeNode *TreeNode::deleteRightmostChild() {
 
 int TreeNode::getSize() {
 	return m_child.size();
+}
+
+int TreeNode::getSum() {
+	int ret = 0;
+	for (auto & i : m_child)
+		ret += i->getSum();
+	++ret;
+	return ret;
 }
 
 list<TreeNode*> &TreeNode::getChild() {

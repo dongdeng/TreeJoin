@@ -1,6 +1,7 @@
 #include <iostream>
 #include "tree.h"
 #include <vector>
+#include <cstring>
 
 using namespace std;
 
@@ -13,37 +14,38 @@ int getMin(int a, int b) {
 }
 
 int costFunc(const string &a, const string &b) {
-	int len_a = a.length(), len_b = b.length();
-	vector<int> d0(len_b + 1, 0), d1(len_b + 1, 0);
-	for(int i = 0; i <= len_a; ++ i) {
-        for(int j = 0; j <= len_b; ++ j) {
-            if(i == 0)
-                d1[j] = j;
-            else if(j == 0)
-                d1[j] = i;
-            else {
-				if(a[i - 1] == b[j - 1])
-                    d1[j] = d0[j - 1];
-                else
-                    d1[j] = d0[j - 1] + 1;
-                d1[j] = min(d1[j], 1 + min(d1[j - 1], d0[j]));
-            }
-        }
-        swap(d0, d1);
-    }
-    return d0[len_b];
+	if (a == b)
+		return 0;
+	return 1;	
 }
 
+int dfs(TreeNode *f1, TreeNode *f2, int **ans, int sum1, int sum2);
+
 int treeED(TreeNode *f1, TreeNode *f2) {
+	int n = f1->getSum(), m = f2->getSum();
+	int **ans = new int*[n];
+	for (int i = 0; i < n; ++i) {
+		ans[i] = new int[m];
+		memset(ans[i], -1, sizeof(int) * m);
+	}
+	dfs(f1, f2, ans, 0, 0);
+	int ret = ans[0][0];
+	delete ans;
+	return ret;
+}
+
+int dfs(TreeNode *f1, TreeNode *f2, int **ans, int sum1, int sum2) {
 	if (f1 == NULL && f2 == NULL)
 		return 0;
+	if (ans[sum1][sum2] != -1)
+		return ans[sum1][sum2];
 	int ret = -1;
 	//cout << "0" << endl;
 	if (f1->getSize() > 0) {
 		int temp = f1->getSize();
 		TreeNode *v = f1->deleteRightmostChild();
 		string s = "";
-		ret = getMin(ret, treeED(f1, f2) + costFunc(v->getLabel(), s));
+		ret = getMin(ret, dfs(f1, f2, ans, sum1 + 1, sum2) + costFunc(v->getLabel(), s));
 		while (f1->getSize() > temp - 1)
 			f1->deleteRightmostTree();
 		f1->insertChild(v);
@@ -53,7 +55,7 @@ int treeED(TreeNode *f1, TreeNode *f2) {
 		int temp = f2->getSize();
 		TreeNode *w = f2->deleteRightmostChild();
 		string s = "";
-		ret = getMin(ret, treeED(f1, f2) + costFunc(s, w->getLabel()));
+		ret = getMin(ret, dfs(f1, f2, ans, sum1, sum2 + 1) + costFunc(s, w->getLabel()));
 		while (f2->getSize() > temp - 1)
 			f2->deleteRightmostTree();
 		f2->insertChild(w);
@@ -62,12 +64,13 @@ int treeED(TreeNode *f1, TreeNode *f2) {
 	if (f1->getSize() > 0 && f2->getSize() > 0) {
 		TreeNode *v = f1->deleteRightmostTree();
 		TreeNode *w = f2->deleteRightmostTree();
-		ret = getMin(ret, treeED(v, w) + treeED(f1, f2) + costFunc(v->getLabel(), w->getLabel()));
+		ret = getMin(ret, treeED(v, w) + dfs(f1, f2, ans, sum1 + v->getSum(), sum2 + w->getSum()) + costFunc(v->getLabel(), w->getLabel()));
 		f1->insertChild(v);
 		f2->insertChild(w);
 	}
 	if (ret == -1)
 		ret = 0;
+	ans[sum1][sum2] = ret;
 	return ret;
 }
 

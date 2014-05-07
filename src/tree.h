@@ -3,6 +3,7 @@
 
 #include <list>
 #include <iostream>
+#include <fstream>
 
 using namespace std;
 
@@ -10,6 +11,7 @@ class TreeNode {
 private:	
 	string m_label;
 	list<TreeNode*> m_child;
+	TreeNode *read(ifstream &fin);
 public:
 	TreeNode();
 	TreeNode(string label);
@@ -21,6 +23,7 @@ public:
 	TreeNode *deleteRightmostTree();
 	TreeNode *deleteRightmostChild();
 	int getSize();
+	int getSum();
 	list<TreeNode*> &getChild();
 };
 
