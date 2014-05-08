@@ -3,7 +3,7 @@
 #include <vector>
 #include <cstring>
 #include <fstream>
-#include "SimJoiner/SimJoiner.h"
+#include "SimJoiner.h"
 
 using namespace std;
 
@@ -121,6 +121,7 @@ int main(int argc, char **argv) {
 	findSimilarityJoin(edThreshold, resultED);
 	vector<pair<int, int> > result;
 	for (auto & i : resultED) {
+		//cout << i.id1 << ' ' << i.id2 << endl;
 		if (treeED(f1->getChild()[i.id1], f2->getChild()[i.id2]) <= edThreshold) {
 			result.push_back(make_pair(i.id1, i.id2));
 			cout << i.id1 << ' ' << i.id2 << endl;
