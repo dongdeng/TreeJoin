@@ -3,6 +3,7 @@
 #include <vector>
 #include <cstring>
 #include <fstream>
+#include "SimJoiner/SimJoiner.h"
 
 using namespace std;
 
@@ -92,6 +93,13 @@ void generatePostorderedString(TreeNode *root, char *filename) {
 	cout << "geneating finished" << endl;
 }
 
+void findSimilarityJoin(int edThreshold, vector<EDJoinResult> &resultED) {
+	SimJoiner joiner;
+	unsigned q = 1;
+	double jaccardThreshold = 0.8;
+	joiner.joinED("strings.txt", "strings.txt", q, edThreshold, resultED);
+}
+
 int main(int argc, char **argv) {
 	if (argc < 3) {
 		cout << "Usage : " << endl;
@@ -107,4 +115,15 @@ int main(int argc, char **argv) {
 	//cout << treeED(f1, f2) << endl;
 
 	generatePostorderedString(f1, "strings.txt");
+
+	int edThreshold = 1;
+	vector<EDJoinResult> resultED;
+	findSimilarityJoin(edThreshold, resultED);
+	vector<pair<int, int> > result;
+	for (auto & i : resultED) {
+		if (treeED(f1->getChild()[i.id1], f2->getChild()[i.id2]) <= edThreshold) {
+			result.push_back(make_pair(i.id1, i.id2));
+			cout << i.id1 << ' ' << i.id2 << endl;
+		}
+	}
 }

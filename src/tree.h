@@ -1,7 +1,7 @@
 #ifndef TREE_H
 #define TREE_H
 
-#include <list>
+#include <vector>
 #include <iostream>
 #include <fstream>
 
@@ -10,7 +10,7 @@ using namespace std;
 class TreeNode {
 private:	
 	string m_label;
-	list<TreeNode*> m_child;
+	vector<TreeNode*> m_child;
 	TreeNode *read(ifstream &fin);
 public:
 	TreeNode();
@@ -24,7 +24,7 @@ public:
 	TreeNode *deleteRightmostChild();
 	int getSize();
 	int getSum();
-	list<TreeNode*> &getChild();
+	vector<TreeNode*> &getChild();
 };
 
 #endif

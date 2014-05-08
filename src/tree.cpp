@@ -63,7 +63,7 @@ TreeNode *TreeNode::deleteRightmostChild() {
 	TreeNode *rightmostChild = deleteRightmostTree();
 	if (rightmostChild == NULL)
 		return NULL;
-	list<TreeNode*> &childList = rightmostChild->getChild();
+	vector<TreeNode*> &childList = rightmostChild->getChild();
 	for (auto & i : childList)
 		m_child.push_back(i);
 	return rightmostChild;
@@ -81,6 +81,6 @@ int TreeNode::getSum() {
 	return ret;
 }
 
-list<TreeNode*> &TreeNode::getChild() {
+vector<TreeNode*> &TreeNode::getChild() {
 	return m_child;
 }
