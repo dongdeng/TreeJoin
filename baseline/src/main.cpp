@@ -133,7 +133,7 @@ int main(int argc, char **argv) {
 		findSimilarityJoin(edThreshold, resultED);
 		clock_t end = clock();
 		cout << "the number of the filtered pairs = " << resultED.size() << endl;
-		cout << "the time of filtering = " << (end - begin) / CLOCKS_PER_SEC << endl;
+		cout << "the time of PassJoin = " << (end - begin) / CLOCKS_PER_SEC << endl;
 		vector<pair<int, int> > result;
 		begin = clock();
 		for (auto & i : resultED) {
@@ -144,7 +144,7 @@ int main(int argc, char **argv) {
 		}
 		end = clock();
 		cout << "the number of the final pairs = " << result.size() << endl;
-		cout << "the time of filtering = " << (end - begin) / CLOCKS_PER_SEC << endl;
+		cout << "the time of treeED = " << (end - begin) / CLOCKS_PER_SEC << endl;
 		cout << "-----------------------------------------------------" << endl;
 	}
 }

@@ -127,23 +127,36 @@ void TreeJoin(vector<TreeNode*> &f, int threshold, vector<pair<int, int> > &resu
 		addToMap(f[i]);
 	}
 
-	unordered_map<string, int> L;
+	unordered_map<string, vector<int> > L;
 	for (int i = 0; i < n; ++i) {
 		//get the list
-		vector<pair<int, int> > list;
+		vector<pair<TreeNode*, int> > list;
 		addToList(list, f[i]);
 		sort(list.begin(), list.end(), PairCompare);
 
 		//get the prefix
-		int k = m, m = list.size();
-		if (m > threshold + 1) {
+		int m = list.size();
+		for (k = 1; k < m; ++k) {
+			for 
 		}
 
 		//get the candidates
+		vector<int> candidates;
 
 		//verification
+		for (auto & j : candidates)
+			if (treeED(f[i], f[j]) <= threshold) {
+				result.push_back(make_pair(i, j));
+			}
 
 		//indexing all the prefix
+		for (auto & j : list) {
+			if (L.find((j.first)->getEulerString()) == L.end()) {
+				vector<int> temp;
+				L[(j.first)->getEulerString()] = temp;
+			}
+			L[(j.first)->getEulerString()].push_back(i);
+		}
 	}
 }
 
@@ -168,9 +181,14 @@ int main(int argc, char **argv) {
 		f.push_back(f1->getChild()[i]);
 	}
 
-	clock_t begin = clock();
 	vector<pair<int, int> > result;
 	for (int i = 1; i <= 20; ++i) {
+		cout << "the threshold = " << i << endl;
+		clock_t begin = clock();
 		TreeJoin(f, i, result);
+		clock_t end = clock();
+		cout << "the number of the final pairs = " << result.size() << endl;
+		cout << "the time of TreeJoin = " << (end - begin) / CLOCKS_PER_SEC << endl;
+		cout << "-----------------------------------------------------" << endl;
 	}
 }
