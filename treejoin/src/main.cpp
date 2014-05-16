@@ -3,7 +3,6 @@
 #include <vector>
 #include <cstring>
 #include <fstream>
-#include "SimJoiner.h"
 
 using namespace std;
 
@@ -94,18 +93,58 @@ int generatePostorderedString(TreeNode *root, char *filename) {
 			fout << temp << endl;
 			++count;
 		}
-		//cout << count << endl;
 	}
 	fout.close();
 	cout << "geneating finished" << endl;
 	return count;
 }
 
-void findSimilarityJoin(int edThreshold, vector<EDJoinResult> &resultED) {
-	SimJoiner joiner;
-	unsigned q = 5;
-	double jaccardThreshold = 0.8;
-	joiner.joinED("strings.txt", "strings.txt", q, edThreshold, resultED);
+vector<pair<string, int> > M;
+
+void addToMap(TreeNode *root) {
+	M[root->getEulerString()] += 1;
+	for (auto & i : root->getChild())
+		addToMap(i);
+}
+
+void addToList(vector<pair<TreeNode*, int> > &list, TreeNode *root) {
+	list.push_back(make_pair(root, M[root->getEulerString()]));
+	for (auto & i : root->getChild())
+		addToList(list, i);
+}
+
+bool PairCompare(const pair<TreeNode*, int> &a, const pair<TreeNode*, int> &b) {
+	return a.second == b.second ? (a.first)->getEulerString() < (b.first)->getEulerString() : a.second > b.second;
+}
+
+void TreeJoin(vector<TreeNode*> &f, int threshold, vector<pair<int, int> > &result) {
+	result.clear();
+
+	//get the map
+	int n = f.size();
+	for (int i = 0; i < n; ++i) {
+		f[i]->calcEulerString();
+		addToMap(f[i]);
+	}
+
+	unordered_map<string, int> L;
+	for (int i = 0; i < n; ++i) {
+		//get the list
+		vector<pair<int, int> > list;
+		addToList(list, f[i]);
+		sort(list.begin(), list.end(), PairCompare);
+
+		//get the prefix
+		int k = m, m = list.size();
+		if (m > threshold + 1) {
+		}
+
+		//get the candidates
+
+		//verification
+
+		//indexing all the prefix
+	}
 }
 
 int main(int argc, char **argv) {
@@ -120,31 +159,18 @@ int main(int argc, char **argv) {
 	TreeNode *f2 = new TreeNode();
 	f2->readFile(argv[2]);
 	cout << "reading finished" << endl;
-	//cout << treeED(f1, f2) << endl;
 
 	int n = generatePostorderedString(f1, "strings.txt");
 	cout << "totalNum = " << n << endl;
 
+	vector<TreeNode*> f;
+	for (int i = 0; i < n; ++i) {
+		f.push_back(f1->getChild()[i]);
+	}
+
+	clock_t begin = clock();
+	vector<pair<int, int> > result;
 	for (int i = 1; i <= 20; ++i) {
-		int edThreshold = i;
-		cout << "the threshold = " << i << endl;
-		vector<EDJoinResult> resultED;
-		clock_t begin = clock();
-		findSimilarityJoin(edThreshold, resultED);
-		clock_t end = clock();
-		cout << "the number of the filtered pairs = " << resultED.size() << endl;
-		cout << "the time of filtering = " << (end - begin) / CLOCKS_PER_SEC << endl;
-		vector<pair<int, int> > result;
-		begin = clock();
-		for (auto & i : resultED) {
-			if (treeED(f1->getChild()[i.id1], f2->getChild()[i.id2]) <= edThreshold) {
-				result.push_back(make_pair(i.id1, i.id2));
-				//cout << i.id1 << ' ' << i.id2 << endl;
-			}
-		}
-		end = clock();
-		cout << "the number of the final pairs = " << result.size() << endl;
-		cout << "the time of filtering = " << (end - begin) / CLOCKS_PER_SEC << endl;
-		cout << "-----------------------------------------------------" << endl;
+		TreeJoin(f, i, result);
 	}
 }

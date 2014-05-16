@@ -89,6 +89,7 @@ void SimJoiner::getResultED(unsigned q, unsigned threshold, vector<int> &d0, vec
 	vector<vector<unordered_map<string, vector<int> > > > &list = m_list.getList();
 	int i = 0;
 	EDJoinResult rr;
+	int candidate = 0;
 	for(auto & s : m_str2) {
 	//for(int i = 0; i < m_str2.size(); ++ i) {
 		unsigned length = s.length();
@@ -126,6 +127,7 @@ void SimJoiner::getResultED(unsigned q, unsigned threshold, vector<int> &d0, vec
 									rr.s = ed;
 									resultED.push_back(rr);
 								}
+								++candidate;
 								map[r] = true;
 							}
 				}
@@ -141,10 +143,12 @@ void SimJoiner::getResultED(unsigned q, unsigned threshold, vector<int> &d0, vec
 				rr.s = ed;
 				resultED.push_back(rr);
 			}
+			++candidate;
 			++ k;
 		}
 		++ i;
 	}
+	cout << "the number of candidates = " << candidate << endl;
 }
 
 unsigned SimJoiner::getED(TString &a, TString &b, unsigned threshold, vector<int> &d0, vector<int> &d1)
