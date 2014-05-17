@@ -114,7 +114,7 @@ void addToList(vector<pair<TreeNode*, int> > &list, TreeNode *root) {
 }
 
 bool PairCompare(const pair<TreeNode*, int> &a, const pair<TreeNode*, int> &b) {
-	return a.second == b.second ? (a.first)->getEulerString() < (b.first)->getEulerString() : a.second > b.second;
+	return a.second == b.second ? (a.first)->getEulerString().length() > (b.first)->getEulerString().length() : a.second > b.second;
 }
 
 void TreeJoin(vector<TreeNode*> &f, int threshold, vector<pair<int, int> > &result) {
@@ -135,13 +135,33 @@ void TreeJoin(vector<TreeNode*> &f, int threshold, vector<pair<int, int> > &resu
 		sort(list.begin(), list.end(), PairCompare);
 
 		//get the prefix
-		int m = list.size();
+		int m = list.size(), num = 1;
+		vector<int> flag(m, 1);
 		for (k = 1; k < m; ++k) {
-			for 
+			for (int j = 0; j < k; ++j)
+				if (list[j].first == (list[k].first)->getFather()) {
+					if (flag[j] == 1) {
+						flag[j] = 0;
+					}
+					else {
+						++num;
+					}
+					break;
+				}
+			if (num == threshold + 1)
+				break;
 		}
 
 		//get the candidates
 		vector<int> candidates;
+		for (int j = 0; j <= k; ++j)
+			if (flag[j] == 1) {
+				if (L.find((list[j].first)->getEulerString()) != L.end()) {
+					for (auto & l : L[(list[j].first)->getEulerString()]) {
+						//some pruning techniques
+					}
+				}
+			}
 
 		//verification
 		for (auto & j : candidates)

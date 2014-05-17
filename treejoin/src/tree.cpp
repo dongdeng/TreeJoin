@@ -5,10 +5,12 @@
 using namespace std;
 
 TreeNode::TreeNode() {
+	m_father = NULL;
 }
 
 TreeNode::TreeNode(string label) {
 	m_label = label;
+	m_father = NULL;
 }
 
 TreeNode::~TreeNode() {
@@ -25,6 +27,8 @@ TreeNode *TreeNode::read(ifstream &fin) {
 	getline(fin, tag);
 	for (int i = 0; i < n; ++i)
 		ret->insertChild(read(fin));
+	for (auto & i : ret->getChild())
+		i->setFather(ret);
 	return ret;
 }
 
@@ -38,6 +42,8 @@ void TreeNode::readFile(char *filename) {
 	getline(fin, tag);
 	for (int i = 0; i < n; ++i)
 		insertChild(read(fin));
+	for (auto & i : m_child)
+		i->setFather(this);
 }
 
 void TreeNode::setLabel(string label) {
@@ -102,4 +108,12 @@ void TreeNode::calcEulerString() {
 
 string &TreeNode::getEulerString() {
 	return m_eulerString;
+}
+
+void TreeNode::setFather(TreeNode *father) {
+	m_father = father;
+}
+
+TreeNode *TreeNode::getFather() {
+	return m_father;
 }

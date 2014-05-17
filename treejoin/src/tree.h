@@ -10,6 +10,7 @@ using namespace std;
 class TreeNode {
 private:	
 	string m_label, m_eulerString;
+	TreeNode *m_father;
 	vector<TreeNode*> m_child;
 	TreeNode *read(ifstream &fin);
 public:
@@ -27,6 +28,8 @@ public:
 	vector<TreeNode*> &getChild();
 	void calcEulerString();
 	string &getEulerString();
+	void setFather(TreeNode *father);
+	TreeNode *getFather();
 };
 
 #endif
