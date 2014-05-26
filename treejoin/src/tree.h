@@ -8,28 +8,25 @@
 using namespace std;
 
 class TreeNode {
-private:	
-	string m_label, m_eulerString;
-	TreeNode *m_father;
-	vector<TreeNode*> m_child;
-	TreeNode *read(ifstream &fin);
-public:
+public:	
+	string label, eulerString;
+	TreeNode *father;
+	vector<TreeNode*> child;
+	int anc, left, right, sum;
+
 	TreeNode();
-	TreeNode(string label);
+	TreeNode(string l);
 	~TreeNode();
+	TreeNode *read(ifstream &fin);
 	void readFile(char *filename);
-	void setLabel(string label);
-	string getLabel();
-	bool insertChild(TreeNode *child);
+	bool insertChild(TreeNode *c);
 	TreeNode *deleteRightmostTree();
 	TreeNode *deleteRightmostChild();
 	int getSize();
-	int getSum();
-	vector<TreeNode*> &getChild();
+	void calcSum();
 	void calcEulerString();
-	string &getEulerString();
-	void setFather(TreeNode *father);
-	TreeNode *getFather();
+	void calcALR();
+	void calc();
 };
 
 #endif

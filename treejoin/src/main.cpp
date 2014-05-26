@@ -22,9 +22,9 @@ int costFunc(const string &a, const string &b) {
 
 string getPostorderedString(TreeNode *root) {
 	string ret = "";
-	for (auto & i : root->getChild())
+	for (auto & i : root->child)
 		ret.append(getPostorderedString(i) + "$");
-	ret.append(root->getLabel());
+	ret.append(root->label);
 	return ret;
 }
 
@@ -54,7 +54,7 @@ int dfs(TreeNode *f1, TreeNode *f2, int **ans, int sum1, int sum2) {
 		int temp = f1->getSize();
 		TreeNode *v = f1->deleteRightmostChild();
 		string s = "";
-		ret = getMin(ret, dfs(f1, f2, ans, sum1 + 1, sum2) + costFunc(v->getLabel(), s));
+		ret = getMin(ret, dfs(f1, f2, ans, sum1 + 1, sum2) + costFunc(v->label, s));
 		while (f1->getSize() > temp - 1)
 			f1->deleteRightmostTree();
 		f1->insertChild(v);
@@ -64,7 +64,7 @@ int dfs(TreeNode *f1, TreeNode *f2, int **ans, int sum1, int sum2) {
 		int temp = f2->getSize();
 		TreeNode *w = f2->deleteRightmostChild();
 		string s = "";
-		ret = getMin(ret, dfs(f1, f2, ans, sum1, sum2 + 1) + costFunc(s, w->getLabel()));
+		ret = getMin(ret, dfs(f1, f2, ans, sum1, sum2 + 1) + costFunc(s, w->label);
 		while (f2->getSize() > temp - 1)
 			f2->deleteRightmostTree();
 		f2->insertChild(w);
@@ -73,7 +73,7 @@ int dfs(TreeNode *f1, TreeNode *f2, int **ans, int sum1, int sum2) {
 	if (f1->getSize() > 0 && f2->getSize() > 0) {
 		TreeNode *v = f1->deleteRightmostTree();
 		TreeNode *w = f2->deleteRightmostTree();
-		ret = getMin(ret, treeED(v, w) + dfs(f1, f2, ans, sum1 + v->getSum(), sum2 + w->getSum()) + costFunc(v->getLabel(), w->getLabel()));
+		ret = getMin(ret, treeED(v, w) + dfs(f1, f2, ans, sum1 + v->getSum(), sum2 + w->getSum()) + costFunc(v->label, w->label);
 		f1->insertChild(v);
 		f2->insertChild(w);
 	}
@@ -87,7 +87,7 @@ int generatePostorderedString(TreeNode *root, char *filename) {
 	cout << "start generating postordered string" << endl;
 	ofstream fout(filename);
 	int count = 0;
-	for (auto & i : root->getChild()) {
+	for (auto & i : root->child) {
 		string temp = getPostorderedString(i);
 		if (temp != "") {
 			fout << temp << endl;
@@ -102,19 +102,19 @@ int generatePostorderedString(TreeNode *root, char *filename) {
 vector<pair<string, int> > M;
 
 void addToMap(TreeNode *root) {
-	M[root->getEulerString()] += 1;
-	for (auto & i : root->getChild())
+	M[root->eulerString] += 1;
+	for (auto & i : root->child)
 		addToMap(i);
 }
 
 void addToList(vector<pair<TreeNode*, int> > &list, TreeNode *root) {
-	list.push_back(make_pair(root, M[root->getEulerString()]));
-	for (auto & i : root->getChild())
+	list.push_back(make_pair(root, M[root->eulerString]));
+	for (auto & i : root->child)
 		addToList(list, i);
 }
 
 bool PairCompare(const pair<TreeNode*, int> &a, const pair<TreeNode*, int> &b) {
-	return a.second == b.second ? (a.first)->getEulerString().length() > (b.first)->getEulerString().length() : a.second > b.second;
+	return a.second == b.second ? (a.first)->eulerString.length() > (b.first)->eulerString.length() : a.second > b.second;
 }
 
 void TreeJoin(vector<TreeNode*> &f, int threshold, vector<pair<int, int> > &result) {
@@ -123,7 +123,6 @@ void TreeJoin(vector<TreeNode*> &f, int threshold, vector<pair<int, int> > &resu
 	//get the map
 	int n = f.size();
 	for (int i = 0; i < n; ++i) {
-		f[i]->calcEulerString();
 		addToMap(f[i]);
 	}
 
@@ -139,7 +138,7 @@ void TreeJoin(vector<TreeNode*> &f, int threshold, vector<pair<int, int> > &resu
 		vector<int> flag(m, 1);
 		for (k = 1; k < m; ++k) {
 			for (int j = 0; j < k; ++j)
-				if (list[j].first == (list[k].first)->getFather()) {
+				if (list[j].first == (list[k].first)->father) {
 					if (flag[j] == 1) {
 						flag[j] = 0;
 					}
@@ -156,8 +155,8 @@ void TreeJoin(vector<TreeNode*> &f, int threshold, vector<pair<int, int> > &resu
 		vector<int> candidates;
 		for (int j = 0; j <= k; ++j)
 			if (flag[j] == 1) {
-				if (L.find((list[j].first)->getEulerString()) != L.end()) {
-					for (auto & l : L[(list[j].first)->getEulerString()]) {
+				if (L.find((list[j].first)->eulerString) != L.end()) {
+					for (auto & l : L[(list[j].first)->eulerString]) {
 						//some pruning techniques
 					}
 				}
@@ -171,11 +170,11 @@ void TreeJoin(vector<TreeNode*> &f, int threshold, vector<pair<int, int> > &resu
 
 		//indexing all the prefix
 		for (auto & j : list) {
-			if (L.find((j.first)->getEulerString()) == L.end()) {
+			if (L.find((j.first)->eulerString) == L.end()) {
 				vector<int> temp;
-				L[(j.first)->getEulerString()] = temp;
+				L[(j.first)->eulerString] = temp;
 			}
-			L[(j.first)->getEulerString()].push_back(i);
+			L[(j.first)->eulerString].push_back(i);
 		}
 	}
 }
@@ -198,8 +197,10 @@ int main(int argc, char **argv) {
 
 	vector<TreeNode*> f;
 	for (int i = 0; i < n; ++i) {
-		f.push_back(f1->getChild()[i]);
+		f.push_back(f1->child[i]);
+		f1->child[i]->father = f;
 	}
+	f->calc();
 
 	vector<pair<int, int> > result;
 	for (int i = 1; i <= 20; ++i) {
