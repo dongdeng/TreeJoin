@@ -38,7 +38,7 @@ void TreeNode::readFile(char *filename) {
 	ifstream fin(filename);
 	string tag;
 	getline(fin, tag);
-	setLabel(tag);
+	label = tag;
 	int n;
 	fin >> n;
 	getline(fin, tag);
@@ -76,13 +76,10 @@ int TreeNode::getSize() {
 
 void TreeNode::calcEulerString() {
 	eulerString = label;
-	bool flag = false;
 	for (auto & i : child) {
 		i->calcEulerString();
-		if (i->eulerString != "") {
-			flag = true;
+		if (i->eulerString != "")
 			eulerString += "$" + i->eulerString;
-		}
 	}
 	eulerString += "$" + label;
 }
@@ -94,11 +91,10 @@ void TreeNode::calcSum() {
 		sum += i->sum;
 	}
 	++sum;
-	return sum;
 }
 
 void TreeNode::calcALR() {
-	for (int i = 0; i < child.size(); ++i) {
+	for (int i = 0; i < int(child.size()); ++i) {
 		child[i]->anc = anc + 1;
 		if (i > 0)
 			child[i]->left += child[i - 1]->left + child[i - 1]->sum;
@@ -110,7 +106,7 @@ void TreeNode::calcALR() {
 			child[i]->right = child[i + 1]->right + child[i + 1]->sum;
 		else
 			child[i]->right = right;
-		calcALR(child[i]);
+		child[i]->calcALR();
 	}
 }
 

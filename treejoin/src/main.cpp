@@ -3,6 +3,8 @@
 #include <vector>
 #include <cstring>
 #include <fstream>
+#include <unordered_map>
+#include <algorithm>
 
 using namespace std;
 
@@ -31,7 +33,7 @@ string getPostorderedString(TreeNode *root) {
 int dfs(TreeNode *f1, TreeNode *f2, int **ans, int sum1, int sum2);
 
 int treeED(TreeNode *f1, TreeNode *f2) {
-	int n = f1->getSum(), m = f2->getSum();
+	int n = f1->sum, m = f2->sum;
 	int **ans = new int*[n];
 	for (int i = 0; i < n; ++i) {
 		ans[i] = new int[m];
@@ -64,7 +66,7 @@ int dfs(TreeNode *f1, TreeNode *f2, int **ans, int sum1, int sum2) {
 		int temp = f2->getSize();
 		TreeNode *w = f2->deleteRightmostChild();
 		string s = "";
-		ret = getMin(ret, dfs(f1, f2, ans, sum1, sum2 + 1) + costFunc(s, w->label);
+		ret = getMin(ret, dfs(f1, f2, ans, sum1, sum2 + 1) + costFunc(s, w->label));
 		while (f2->getSize() > temp - 1)
 			f2->deleteRightmostTree();
 		f2->insertChild(w);
@@ -73,7 +75,7 @@ int dfs(TreeNode *f1, TreeNode *f2, int **ans, int sum1, int sum2) {
 	if (f1->getSize() > 0 && f2->getSize() > 0) {
 		TreeNode *v = f1->deleteRightmostTree();
 		TreeNode *w = f2->deleteRightmostTree();
-		ret = getMin(ret, treeED(v, w) + dfs(f1, f2, ans, sum1 + v->getSum(), sum2 + w->getSum()) + costFunc(v->label, w->label);
+		ret = getMin(ret, treeED(v, w) + dfs(f1, f2, ans, sum1 + v->sum, sum2 + w->sum) + costFunc(v->label, w->label));
 		f1->insertChild(v);
 		f2->insertChild(w);
 	}
@@ -99,7 +101,7 @@ int generatePostorderedString(TreeNode *root, char *filename) {
 	return count;
 }
 
-vector<pair<string, int> > M;
+unordered_map<string, int> M;
 
 void addToMap(TreeNode *root) {
 	M[root->eulerString] += 1;
@@ -136,6 +138,7 @@ void TreeJoin(vector<TreeNode*> &f, int threshold, vector<pair<int, int> > &resu
 		//get the prefix
 		int m = list.size(), num = 1;
 		vector<int> flag(m, 1);
+		int k;
 		for (k = 1; k < m; ++k) {
 			for (int j = 0; j < k; ++j)
 				if (list[j].first == (list[k].first)->father) {
@@ -158,6 +161,8 @@ void TreeJoin(vector<TreeNode*> &f, int threshold, vector<pair<int, int> > &resu
 				if (L.find((list[j].first)->eulerString) != L.end()) {
 					for (auto & l : L[(list[j].first)->eulerString]) {
 						//some pruning techniques
+						//PRUNING 1
+						//PRUNING 2
 					}
 				}
 			}
@@ -198,9 +203,8 @@ int main(int argc, char **argv) {
 	vector<TreeNode*> f;
 	for (int i = 0; i < n; ++i) {
 		f.push_back(f1->child[i]);
-		f1->child[i]->father = f;
+		f1->child[i]->calc();
 	}
-	f->calc();
 
 	vector<pair<int, int> > result;
 	for (int i = 1; i <= 20; ++i) {

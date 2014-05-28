@@ -23,16 +23,16 @@ int costFunc(const string &a, const string &b) {
 
 string getPostorderedString(TreeNode *root) {
 	string ret = "";
-	for (auto & i : root->getChild())
+	for (auto & i : root->child)
 		ret.append(getPostorderedString(i) + "$");
-	ret.append(root->getLabel());
+	ret.append(root->label);
 	return ret;
 }
 
 int dfs(TreeNode *f1, TreeNode *f2, int **ans, int sum1, int sum2);
 
 int treeED(TreeNode *f1, TreeNode *f2) {
-	int n = f1->getSum(), m = f2->getSum();
+	int n = f1->sum, m = f2->sum;
 	int **ans = new int*[n];
 	for (int i = 0; i < n; ++i) {
 		ans[i] = new int[m];
@@ -55,7 +55,7 @@ int dfs(TreeNode *f1, TreeNode *f2, int **ans, int sum1, int sum2) {
 		int temp = f1->getSize();
 		TreeNode *v = f1->deleteRightmostChild();
 		string s = "";
-		ret = getMin(ret, dfs(f1, f2, ans, sum1 + 1, sum2) + costFunc(v->getLabel(), s));
+		ret = getMin(ret, dfs(f1, f2, ans, sum1 + 1, sum2) + costFunc(v->label, s));
 		while (f1->getSize() > temp - 1)
 			f1->deleteRightmostTree();
 		f1->insertChild(v);
@@ -65,7 +65,7 @@ int dfs(TreeNode *f1, TreeNode *f2, int **ans, int sum1, int sum2) {
 		int temp = f2->getSize();
 		TreeNode *w = f2->deleteRightmostChild();
 		string s = "";
-		ret = getMin(ret, dfs(f1, f2, ans, sum1, sum2 + 1) + costFunc(s, w->getLabel()));
+		ret = getMin(ret, dfs(f1, f2, ans, sum1, sum2 + 1) + costFunc(s, w->label));
 		while (f2->getSize() > temp - 1)
 			f2->deleteRightmostTree();
 		f2->insertChild(w);
@@ -74,7 +74,7 @@ int dfs(TreeNode *f1, TreeNode *f2, int **ans, int sum1, int sum2) {
 	if (f1->getSize() > 0 && f2->getSize() > 0) {
 		TreeNode *v = f1->deleteRightmostTree();
 		TreeNode *w = f2->deleteRightmostTree();
-		ret = getMin(ret, treeED(v, w) + dfs(f1, f2, ans, sum1 + v->getSum(), sum2 + w->getSum()) + costFunc(v->getLabel(), w->getLabel()));
+		ret = getMin(ret, treeED(v, w) + dfs(f1, f2, ans, sum1 + v->sum, sum2 + w->sum) + costFunc(v->label, w->label));
 		f1->insertChild(v);
 		f2->insertChild(w);
 	}
@@ -88,7 +88,7 @@ int generatePostorderedString(TreeNode *root, char *filename) {
 	cout << "start generating postordered string" << endl;
 	ofstream fout(filename);
 	int count = 0;
-	for (auto & i : root->getChild()) {
+	for (auto & i : root->child) {
 		string temp = getPostorderedString(i);
 		if (temp != "") {
 			fout << temp << endl;
@@ -104,7 +104,7 @@ int generatePostorderedString(TreeNode *root, char *filename) {
 void findSimilarityJoin(int edThreshold, vector<EDJoinResult> &resultED) {
 	SimJoiner joiner;
 	unsigned q = 5;
-	double jaccardThreshold = 0.8;
+	//double jaccardThreshold = 0.8;
 	joiner.joinED("strings.txt", "strings.txt", q, edThreshold, resultED);
 }
 
@@ -120,6 +120,8 @@ int main(int argc, char **argv) {
 	TreeNode *f2 = new TreeNode();
 	f2->readFile(argv[2]);
 	cout << "reading finished" << endl;
+	f1->calc();
+	f2->calc();
 	//cout << treeED(f1, f2) << endl;
 
 	int n = generatePostorderedString(f1, "strings.txt");
@@ -132,19 +134,19 @@ int main(int argc, char **argv) {
 		clock_t begin = clock();
 		findSimilarityJoin(edThreshold, resultED);
 		clock_t end = clock();
-		cout << "the number of the filtered pairs = " << resultED.size() << endl;
+		cout << "the result of PassJoin = " << resultED.size() << endl;
 		cout << "the time of PassJoin = " << (end - begin) / CLOCKS_PER_SEC << endl;
 		vector<pair<int, int> > result;
 		begin = clock();
 		for (auto & i : resultED) {
-			if (treeED(f1->getChild()[i.id1], f2->getChild()[i.id2]) <= edThreshold) {
+			if (treeED(f1->child[i.id1], f2->child[i.id2]) <= edThreshold) {
 				result.push_back(make_pair(i.id1, i.id2));
 				//cout << i.id1 << ' ' << i.id2 << endl;
 			}
 		}
 		end = clock();
-		cout << "the number of the final pairs = " << result.size() << endl;
-		cout << "the time of treeED = " << (end - begin) / CLOCKS_PER_SEC << endl;
+		cout << "the result of TreeED = " << result.size() << endl;
+		cout << "the time of TreeED = " << (end - begin) / CLOCKS_PER_SEC << endl;
 		cout << "-----------------------------------------------------" << endl;
 	}
 }

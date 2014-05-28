@@ -5,10 +5,14 @@
 using namespace std;
 
 TreeNode::TreeNode() {
+	father = NULL;
+	anc = left = right = 0;
 }
 
-TreeNode::TreeNode(string label) {
-	m_label = label;
+TreeNode::TreeNode(string l) {
+	label = l;
+	father = NULL;
+	anc = left = right = 0;
 }
 
 TreeNode::~TreeNode() {
@@ -25,6 +29,8 @@ TreeNode *TreeNode::read(ifstream &fin) {
 	getline(fin, tag);
 	for (int i = 0; i < n; ++i)
 		ret->insertChild(read(fin));
+	for (auto & i : ret->child)
+		i->father = ret;
 	return ret;
 }
 
@@ -32,32 +38,26 @@ void TreeNode::readFile(char *filename) {
 	ifstream fin(filename);
 	string tag;
 	getline(fin, tag);
-	setLabel(tag);
+	label = tag;
 	int n;
 	fin >> n;
 	getline(fin, tag);
 	for (int i = 0; i < n; ++i)
 		insertChild(read(fin));
+	for (auto & i : child)
+		i->father = this;
 }
 
-void TreeNode::setLabel(string label) {
-	m_label = label;
-}
-
-string TreeNode::getLabel() {
-	return m_label;
-}
-
-bool TreeNode::insertChild(TreeNode *child) {
-	m_child.push_back(child);
+bool TreeNode::insertChild(TreeNode *c) {
+	child.push_back(c);
 	return true;
 }
 
 TreeNode *TreeNode::deleteRightmostTree() {
-	if (m_child.empty())
+	if (child.empty())
 		return NULL;
-	TreeNode *ret = m_child.back();
-	m_child.pop_back();
+	TreeNode *ret = child.back();
+	child.pop_back();
 	return ret;
 }
 
@@ -65,24 +65,55 @@ TreeNode *TreeNode::deleteRightmostChild() {
 	TreeNode *rightmostChild = deleteRightmostTree();
 	if (rightmostChild == NULL)
 		return NULL;
-	vector<TreeNode*> &childList = rightmostChild->getChild();
-	for (auto & i : childList)
-		m_child.push_back(i);
+	for (auto & i : rightmostChild->child)
+		child.push_back(i);
 	return rightmostChild;
 }
 
 int TreeNode::getSize() {
-	return m_child.size();
+	return child.size();
 }
 
-int TreeNode::getSum() {
-	int ret = 0;
-	for (auto & i : m_child)
-		ret += i->getSum();
-	++ret;
-	return ret;
+void TreeNode::calcEulerString() {
+	eulerString = label;
+	for (auto & i : child) {
+		i->calcEulerString();
+		if (i->eulerString != "")
+			eulerString += "$" + i->eulerString;
+	}
+	eulerString += "$" + label;
 }
 
-vector<TreeNode*> &TreeNode::getChild() {
-	return m_child;
+void TreeNode::calcSum() {
+	sum = 0;
+	for (auto & i : child) {
+		i->calcSum();
+		sum += i->sum;
+	}
+	++sum;
 }
+
+void TreeNode::calcALR() {
+	for (int i = 0; i < int(child.size()); ++i) {
+		child[i]->anc = anc + 1;
+		if (i > 0)
+			child[i]->left += child[i - 1]->left + child[i - 1]->sum;
+		else
+			child[i]->left = left;
+	}
+	for (int i = int(child.size()) - 1; i >= 0; --i) {
+		if (i + 1 < int(child.size()))
+			child[i]->right = child[i + 1]->right + child[i + 1]->sum;
+		else
+			child[i]->right = right;
+		child[i]->calcALR();
+	}
+}
+
+void TreeNode::calc() {
+	calcSum();
+	calcALR();
+	calcEulerString();
+}
+
+
