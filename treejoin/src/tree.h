@@ -9,7 +9,7 @@ using namespace std;
 
 class TreeNode {
 public:	
-	string label, eulerString;
+	string label, eulerString, postString;
 	TreeNode *father;
 	vector<TreeNode*> child;
 	int anc, left, right, sum;

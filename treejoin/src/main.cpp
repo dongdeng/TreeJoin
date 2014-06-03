@@ -95,6 +95,7 @@ int generatePostorderedString(TreeNode *root, char *filename) {
 			fout << temp << endl;
 			++count;
 		}
+		i->postString = temp;
 	}
 	fout.close();
 	cout << "geneating finished" << endl;
@@ -119,7 +120,46 @@ bool PairCompare(const pair<TreeNode*, int> &a, const pair<TreeNode*, int> &b) {
 	return a.second == b.second ? (a.first)->eulerString.length() > (b.first)->eulerString.length() : a.second > b.second;
 }
 
-void TreeJoin(vector<TreeNode*> &f, int threshold, vector<pair<int, int> > &result) {
+int getDistance(string &a, string &b, int threshold)
+{
+	double dis = 0;
+	int len_a = a.length(), len_b = b.length();
+	vector<int> d0(len_b + 1, 0);
+	vector<int> d1(len_b + 1, 0);
+	dis = threshold + 1;
+	if (abs(len_a - len_b) > threshold)
+		return dis;
+	for (int i = 0; i <= len_a; ++ i)
+	{
+		int l = max(0, i - (int)threshold), r = min(len_b, i + (int)threshold);
+		int minDis = threshold + 1;
+		for (int j = l; j <= r; ++ j)
+		{
+			if(i == 0)
+            	d1[j] = j;
+        	else if(j == 0)
+            	d1[j] = i;
+			else 
+			{
+				if (a[i - 1] == b[j - 1])
+                	d1[j] = d0[j - 1];
+            	else
+            	    d1[j] = d0[j - 1] + 1;
+				if (j > l) d1[j] = min(d1[j], d1[j - 1] + 1);
+    			if (j < i + threshold) d1[j] = min(d1[j], d0[j] + 1);
+    		}
+    		minDis = min(minDis, d1[j]);	
+		}
+		if (minDis > threshold)
+			return dis;
+        swap(d0, d1);
+    }
+    dis = d0[len_b];
+	return dis;
+}
+
+
+void TreeJoin(vector<TreeNode*> &f, vector<TreeNode*> &ff, int threshold, vector<pair<int, int> > &result) {
 	result.clear();
 
 	//get the map
@@ -130,6 +170,7 @@ void TreeJoin(vector<TreeNode*> &f, int threshold, vector<pair<int, int> > &resu
 
 	unordered_map<string, vector<int> > L;
 	for (int i = 0; i < n; ++i) {
+		cout << "i = " << i << endl;
 		//get the list
 		vector<pair<TreeNode*, int> > list;
 		addToList(list, f[i]);
@@ -156,22 +197,32 @@ void TreeJoin(vector<TreeNode*> &f, int threshold, vector<pair<int, int> > &resu
 
 		//get the candidates
 		vector<int> candidates;
-		for (int j = 0; j <= k; ++j)
-			if (flag[j] == 1) {
-				if (L.find((list[j].first)->eulerString) != L.end()) {
-					for (auto & l : L[(list[j].first)->eulerString]) {
-						//some pruning techniques
-						//PRUNING 1
-						//PRUNING 2
+		unordered_map<int, bool> isDup;
+		if (num == threshold + 1) {
+			for (int j = 0; j < k; ++j)
+				if (flag[j] == 1) {
+					if (L.find((list[j].first)->eulerString) != L.end()) {
+						for (auto & l : L[(list[j].first)->eulerString]) {
+							//some pruning techniques
+							//PRUNING 1
+	 						if (isDup.find(l) == isDup.end() && getDistance(f[l]->postString, f[i]->postString, threshold) <= threshold) {
+								candidates.push_back(l);
+								isDup[l] = true;
+							}
+							//PRUNING 2
+						}
 					}
 				}
-			}
+		}
+		candidates.push_back(i);
+		cout << candidates.size() << endl;
 
 		//verification
-		for (auto & j : candidates)
-			if (treeED(f[i], f[j]) <= threshold) {
+		for (auto & j : candidates) {
+			if (treeED(f[i], ff[j]) <= threshold) {
 				result.push_back(make_pair(i, j));
 			}
+		}
 
 		//indexing all the prefix
 		for (auto & j : list) {
@@ -201,16 +252,19 @@ int main(int argc, char **argv) {
 	cout << "totalNum = " << n << endl;
 
 	vector<TreeNode*> f;
+	vector<TreeNode*> ff;
 	for (int i = 0; i < n; ++i) {
 		f.push_back(f1->child[i]);
+		ff.push_back(f2->child[i]);
 		f1->child[i]->calc();
+		f2->child[i]->calc();
 	}
 
 	vector<pair<int, int> > result;
-	for (int i = 1; i <= 20; ++i) {
+	for (int i = 2; i <= 20; ++i) {
 		cout << "the threshold = " << i << endl;
 		clock_t begin = clock();
-		TreeJoin(f, i, result);
+		TreeJoin(f, ff, i, result);
 		clock_t end = clock();
 		cout << "the number of the final pairs = " << result.size() << endl;
 		cout << "the time of TreeJoin = " << (end - begin) / CLOCKS_PER_SEC << endl;
