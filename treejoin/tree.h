@@ -4,12 +4,14 @@
 #include <vector>
 #include <iostream>
 #include <fstream>
+#include "TString.h"
 
 using namespace std;
 
 class TreeNode {
 public:	
 	string label, eulerString;
+	TString postString;
 	TreeNode *father;
 	vector<TreeNode*> child;
 	int anc, left, right, sum;

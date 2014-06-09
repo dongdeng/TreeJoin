@@ -90,11 +90,11 @@ int generatePostorderedString(TreeNode *root, char *filename) {
 	int count = 0;
 	for (auto & i : root->child) {
 		string temp = getPostorderedString(i);
-		if (temp != "") {
+		if (temp != "" && temp[0] != '$') {
 			fout << temp << endl;
 			++count;
 		}
-		//cout << count << endl;
+		i->postString = temp;
 	}
 	fout.close();
 	cout << "geneating finished" << endl;
@@ -122,12 +122,11 @@ int main(int argc, char **argv) {
 	cout << "reading finished" << endl;
 	f1->calc();
 	f2->calc();
-	//cout << treeED(f1, f2) << endl;
 
 	int n = generatePostorderedString(f1, "strings.txt");
 	cout << "totalNum = " << n << endl;
 
-	for (int i = 1; i <= 20; ++i) {
+	for (int i = 3; i <= 5; ++i) {
 		int edThreshold = i;
 		cout << "the threshold = " << i << endl;
 		vector<EDJoinResult> resultED;

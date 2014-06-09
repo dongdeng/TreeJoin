@@ -1,5 +1,6 @@
 #include <iostream>
 #include "tree.h"
+#include "TString.h"
 #include <vector>
 #include <cstring>
 #include <fstream>
@@ -91,11 +92,12 @@ int generatePostorderedString(TreeNode *root, char *filename) {
 	int count = 0;
 	for (auto & i : root->child) {
 		string temp = getPostorderedString(i);
-		if (temp != "") {
+		if (temp != "" && temp[0] != '$') {
 			fout << temp << endl;
 			++count;
 		}
-		i->postString = temp;
+		TString t(temp);
+		i->postString = t;
 	}
 	fout.close();
 	cout << "geneating finished" << endl;
@@ -120,7 +122,11 @@ bool PairCompare(const pair<TreeNode*, int> &a, const pair<TreeNode*, int> &b) {
 	return a.second == b.second ? (a.first)->eulerString.length() > (b.first)->eulerString.length() : a.second > b.second;
 }
 
-int getDistance(string &a, string &b, int threshold)
+bool ResultCompare(const pair<int, int> &a, const pair<int, int> &b) {
+	return a.first == b.first ? a.second < b.second : a.first < b.first;
+}
+
+int getED(TString &a, TString &b, int threshold)
 {
 	double dis = 0;
 	int len_a = a.length(), len_b = b.length();
@@ -129,33 +135,33 @@ int getDistance(string &a, string &b, int threshold)
 	dis = threshold + 1;
 	if (abs(len_a - len_b) > threshold)
 		return dis;
-	for (int i = 0; i <= len_a; ++ i)
-	{
-		int l = max(0, i - (int)threshold), r = min(len_b, i + (int)threshold);
-		int minDis = threshold + 1;
-		for (int j = l; j <= r; ++ j)
-		{
-			if(i == 0)
-            	d1[j] = j;
-        	else if(j == 0)
-            	d1[j] = i;
-			else 
-			{
-				if (a[i - 1] == b[j - 1])
-                	d1[j] = d0[j - 1];
-            	else
-            	    d1[j] = d0[j - 1] + 1;
-				if (j > l) d1[j] = min(d1[j], d1[j - 1] + 1);
-    			if (j < i + threshold) d1[j] = min(d1[j], d0[j] + 1);
-    		}
-    		minDis = min(minDis, d1[j]);	
-		}
-		if (minDis > threshold)
-			return dis;
+	for(int i = 0; i <= len_a; ++ i)
+    {
+       	int l = max(0, i - (int)threshold), r = min(len_b, i + (int)threshold);
+        int minDis = threshold + 1;
+        for(int j = l; j <= r; ++ j)
+        {
+        	if(i == 0)
+                d1[j] = j;
+            else if(j == 0)
+               	d1[j] = i;
+        	else 
+        	{
+        		if(a.getElement(i - 1) == b.getElement(j - 1))
+                    d1[j] = d0[j - 1];
+                else
+                   	d1[j] = d0[j - 1] + 1;
+        		if(j > l) d1[j] = min(d1[j], d1[j - 1] + 1);
+            	if(j < i + threshold) d1[j] = min(d1[j], d0[j] + 1);
+            }
+            minDis = min(minDis, d1[j]);	
+        }
+        if(minDis > threshold)
+        	return dis;
         swap(d0, d1);
-    }
+   	}
     dis = d0[len_b];
-	return dis;
+    return dis;
 }
 
 
@@ -170,7 +176,6 @@ void TreeJoin(vector<TreeNode*> &f, vector<TreeNode*> &ff, int threshold, vector
 
 	unordered_map<string, vector<int> > L;
 	for (int i = 0; i < n; ++i) {
-		cout << "i = " << i << endl;
 		//get the list
 		vector<pair<TreeNode*, int> > list;
 		addToList(list, f[i]);
@@ -181,6 +186,8 @@ void TreeJoin(vector<TreeNode*> &f, vector<TreeNode*> &ff, int threshold, vector
 		vector<int> flag(m, 1);
 		int k;
 		for (k = 1; k < m; ++k) {
+			if (num == threshold + 1)
+				break;
 			for (int j = 0; j < k; ++j)
 				if (list[j].first == (list[k].first)->father) {
 					if (flag[j] == 1) {
@@ -191,38 +198,40 @@ void TreeJoin(vector<TreeNode*> &f, vector<TreeNode*> &ff, int threshold, vector
 					}
 					break;
 				}
-			if (num == threshold + 1)
-				break;
 		}
 
 		//get the candidates
 		vector<int> candidates;
 		unordered_map<int, bool> isDup;
-		if (num == threshold + 1) {
-			for (int j = 0; j < k; ++j)
-				if (flag[j] == 1) {
-					if (L.find((list[j].first)->eulerString) != L.end()) {
-						for (auto & l : L[(list[j].first)->eulerString]) {
-							//some pruning techniques
-							//PRUNING 1
-	 						if (isDup.find(l) == isDup.end() && getDistance(f[l]->postString, f[i]->postString, threshold) <= threshold) {
-								candidates.push_back(l);
-								isDup[l] = true;
-							}
-							//PRUNING 2
+		for (int j = 0; j < k; ++j)
+			if (flag[j] == 1) {
+				if (L.find((list[j].first)->eulerString) != L.end()) {
+					for (auto & l : L[(list[j].first)->eulerString]) {
+						//some pruning techniques
+						//PRUNING 1
+ 						if (isDup.find(l) == isDup.end()) {
+							candidates.push_back(l);
+							isDup[l] = true;
 						}
+						//PRUNING 2
 					}
 				}
-		}
+			}
 		candidates.push_back(i);
-		cout << candidates.size() << endl;
+		for (auto & j : candidates) {
+			result.push_back(make_pair(i, j));
+			if (i != j)
+				result.push_back(make_pair(j, i));
+		}
 
 		//verification
-		for (auto & j : candidates) {
+		/*for (auto & j : candidates) {
 			if (treeED(f[i], ff[j]) <= threshold) {
 				result.push_back(make_pair(i, j));
+				if (i != j)
+					result.push_back(make_pair(j, i));
 			}
-		}
+		}*/
 
 		//indexing all the prefix
 		for (auto & j : list) {
@@ -233,6 +242,7 @@ void TreeJoin(vector<TreeNode*> &f, vector<TreeNode*> &ff, int threshold, vector
 			L[(j.first)->eulerString].push_back(i);
 		}
 	}
+	sort(result.begin(), result.end(), ResultCompare);
 }
 
 int main(int argc, char **argv) {
@@ -260,12 +270,27 @@ int main(int argc, char **argv) {
 		f2->child[i]->calc();
 	}
 
-	vector<pair<int, int> > result;
-	for (int i = 2; i <= 20; ++i) {
+	for (int i = 1; i <= 10; ++i) {
+		int edThreshold = i;
+		vector<pair<int, int> > result1, result2, result;
 		cout << "the threshold = " << i << endl;
 		clock_t begin = clock();
-		TreeJoin(f, ff, i, result);
+		TreeJoin(f, ff, i, result1);
 		clock_t end = clock();
+		cout << "the result of prefix filter = " << result1.size() << endl;
+		cout << "the time of prefix filter = " << (end - begin) / CLOCKS_PER_SEC << endl;
+		begin = clock();
+		for (auto & j : result1)
+			if (getED(f[j.first]->postString, f[j.second]->postString, edThreshold) <= edThreshold)
+				result2.push_back(make_pair(j.first, j.second));
+		end = clock();
+		cout << "the result of string ED = " << result2.size() << endl;
+		cout << "the time of string ED = " << (end - begin) / CLOCKS_PER_SEC << endl;
+		begin = clock();
+		for (auto & j : result2)
+			if (treeED(f[j.first], ff[j.second]) <= edThreshold)
+				result.push_back(make_pair(j.first, j.second));
+		end = clock();
 		cout << "the number of the final pairs = " << result.size() << endl;
 		cout << "the time of TreeJoin = " << (end - begin) / CLOCKS_PER_SEC << endl;
 		cout << "-----------------------------------------------------" << endl;
