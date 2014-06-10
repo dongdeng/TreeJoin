@@ -6,6 +6,7 @@
 #include <fstream>
 #include <unordered_map>
 #include <algorithm>
+#include <cassert>
 
 using namespace std;
 
@@ -119,7 +120,7 @@ void addToList(vector<pair<TreeNode*, int> > &list, TreeNode *root) {
 }
 
 bool PairCompare(const pair<TreeNode*, int> &a, const pair<TreeNode*, int> &b) {
-	return a.second == b.second ? (a.first)->eulerString.length() > (b.first)->eulerString.length() : a.second > b.second;
+	return a.second == b.second ? (a.first)->eulerString.length() > (b.first)->eulerString.length() : a.second < b.second;
 }
 
 bool ResultCompare(const pair<int, int> &a, const pair<int, int> &b) {
@@ -183,11 +184,13 @@ void TreeJoin(vector<TreeNode*> &f, vector<TreeNode*> &ff, int threshold, vector
 
 		//get the prefix
 		int m = list.size(), num = 1;
-		vector<int> flag(m, 1);
+		vector<int> flag(m, 0);
+		flag[0] = 1;
 		int k;
 		for (k = 1; k < m; ++k) {
 			if (num == threshold + 1)
 				break;
+			flag[k] = 1;
 			for (int j = 0; j < k; ++j)
 				if (list[j].first == (list[k].first)->father) {
 					if (flag[j] == 1) {
@@ -270,7 +273,8 @@ int main(int argc, char **argv) {
 		f2->child[i]->calc();
 	}
 
-	for (int i = 1; i <= 10; ++i) {
+	for (int ii = 2; ii <= 2; ++ii) {
+		int i = atoi(argv[3]);
 		int edThreshold = i;
 		vector<pair<int, int> > result1, result2, result;
 		cout << "the threshold = " << i << endl;
