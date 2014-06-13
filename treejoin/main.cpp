@@ -43,7 +43,9 @@ int treeED(TreeNode *f1, TreeNode *f2) {
 	}
 	dfs(f1, f2, ans, 0, 0);
 	int ret = ans[0][0];
-	delete ans;
+	for (int i = 0; i < n; ++i)
+		delete ans[i];
+	delete [] ans;
 	return ret;
 }
 
@@ -273,7 +275,7 @@ int main(int argc, char **argv) {
 		f2->child[i]->calc();
 	}
 
-	for (int ii = 2; ii <= 2; ++ii) {
+	for (int ii = 1; ii <= 1; ++ii) {
 		int i = atoi(argv[3]);
 		int edThreshold = i;
 		vector<pair<int, int> > result1, result2, result;
