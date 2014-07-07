@@ -1,4 +1,4 @@
-#include <iostream>
+ #include <iostream>
 #include "tree.h"
 #include "TString.h"
 #include <vector>
@@ -10,13 +10,7 @@
 
 using namespace std;
 
-int getMin(int a, int b) {
-	if (a == -1)
-		return b;
-	if (b == -1)
-		return a;
-	return a > b ? b : a;
-}
+#define LIMIT 20
 
 int costFunc(const string &a, const string &b) {
 	if (a == b)
@@ -32,16 +26,18 @@ string getPostorderedString(TreeNode *root) {
 	return ret;
 }
 
-int dfs(TreeNode *f1, TreeNode *f2, int **ans, int sum1, int sum2);
+int dfs(TreeNode *f1, TreeNode *f2, int **ans, int sum1, int sum2, int threshold);
 
-int treeED(TreeNode *f1, TreeNode *f2) {
+int treeED(TreeNode *f1, TreeNode *f2, int threshold) {
 	int n = f1->sum, m = f2->sum;
+	if (abs(n - m) > threshold)
+		return LIMIT + 1;
 	int **ans = new int*[n];
 	for (int i = 0; i < n; ++i) {
 		ans[i] = new int[m];
 		memset(ans[i], -1, sizeof(int) * m);
 	}
-	dfs(f1, f2, ans, 0, 0);
+	dfs(f1, f2, ans, 0, 0, threshold);
 	int ret = ans[0][0];
 	for (int i = 0; i < n; ++i)
 		delete ans[i];
@@ -49,20 +45,24 @@ int treeED(TreeNode *f1, TreeNode *f2) {
 	return ret;
 }
 
-int dfs(TreeNode *f1, TreeNode *f2, int **ans, int sum1, int sum2) {
+int dfs(TreeNode *f1, TreeNode *f2, int **ans, int sum1, int sum2, int threshold) {
 	if (f1 == NULL && f2 == NULL)
 		return 0;
 	if (ans[sum1][sum2] != -1)
 		return ans[sum1][sum2];
-	int ret = 21;
+	if (threshold < 0)
+		return LIMIT + 1;
 	if (f1->getSize() == 0 || f2->getSize() == 0)
 		return max(f1->getSize(), f2->getSize());
+	if (abs(f1->sum - sum1 - f2->sum + sum2) > threshold)
+		return LIMIT + 1;
+	int ret = LIMIT + 1;
 	//cout << "0" << endl;
 	if (f1->getSize() > 0) {
 		int temp = f1->getSize();
 		TreeNode *v = f1->deleteRightmostChild();
 		string s = "";
-		ret = getMin(ret, dfs(f1, f2, ans, sum1 + 1, sum2) + costFunc(v->label, s));
+		ret = min(ret, dfs(f1, f2, ans, sum1 + 1, sum2, threshold - costFunc(v->label, s)) + costFunc(v->label, s));
 		while (f1->getSize() > temp - 1)
 			f1->deleteRightmostTree();
 		f1->insertChild(v);
@@ -72,7 +72,7 @@ int dfs(TreeNode *f1, TreeNode *f2, int **ans, int sum1, int sum2) {
 		int temp = f2->getSize();
 		TreeNode *w = f2->deleteRightmostChild();
 		string s = "";
-		ret = getMin(ret, dfs(f1, f2, ans, sum1, sum2 + 1) + costFunc(s, w->label));
+		ret = min(ret, dfs(f1, f2, ans, sum1, sum2 + 1, threshold- costFunc(s, w->label)) + costFunc(s, w->label));
 		while (f2->getSize() > temp - 1)
 			f2->deleteRightmostTree();
 		f2->insertChild(w);
@@ -81,7 +81,8 @@ int dfs(TreeNode *f1, TreeNode *f2, int **ans, int sum1, int sum2) {
 	if (f1->getSize() > 0 && f2->getSize() > 0) {
 		TreeNode *v = f1->deleteRightmostTree();
 		TreeNode *w = f2->deleteRightmostTree();
-		ret = getMin(ret, treeED(v, w) + dfs(f1, f2, ans, sum1 + v->sum, sum2 + w->sum) + costFunc(v->label, w->label));
+		int distance = treeED(v, w, threshold);
+		ret = min(ret, distance + dfs(f1, f2, ans, sum1 + v->sum, sum2 + w->sum, threshold - distance - costFunc(v->label, w->label)) + costFunc(v->label, w->label));
 		f1->insertChild(v);
 		f2->insertChild(w);
 	}
@@ -103,7 +104,7 @@ int generatePostorderedString(TreeNode *root, char *filename) {
 		i->postString = t;
 	}
 	fout.close();
-	cout << "geneating finished" << endl;
+	cout << "generating finished" << endl;
 	return count;
 }
 
@@ -209,7 +210,7 @@ void TreeJoin(vector<TreeNode*> &f, vector<TreeNode*> &ff, int threshold, vector
 		vector<int> candidates;
 		unordered_map<int, bool> isDup;
 		for (int j = 0; j < k; ++j)
-			if (flag[j] == 1) {
+			//if (flag[j] == 1) {
 				if (L.find((list[j].first)->eulerString) != L.end()) {
 					for (auto & l : L[(list[j].first)->eulerString]) {
 						//some pruning techniques
@@ -221,7 +222,7 @@ void TreeJoin(vector<TreeNode*> &f, vector<TreeNode*> &ff, int threshold, vector
 						//PRUNING 2
 					}
 				}
-			}
+			//}
 		candidates.push_back(i);
 		for (auto & j : candidates) {
 			result.push_back(make_pair(i, j));
@@ -275,8 +276,7 @@ int main(int argc, char **argv) {
 		f2->child[i]->calc();
 	}
 
-	for (int ii = 1; ii <= 1; ++ii) {
-		int i = atoi(argv[3]);
+	for (int i = 1; i <= 20; ++i) {
 		int edThreshold = i;
 		vector<pair<int, int> > result1, result2, result;
 		cout << "the threshold = " << i << endl;
@@ -294,7 +294,7 @@ int main(int argc, char **argv) {
 		cout << "the time of string ED = " << (end - begin) / CLOCKS_PER_SEC << endl;
 		begin = clock();
 		for (auto & j : result2)
-			if (treeED(f[j.first], ff[j.second]) <= edThreshold)
+			if (treeED(f[j.first], ff[j.second], edThreshold) <= edThreshold)
 				result.push_back(make_pair(j.first, j.second));
 		end = clock();
 		cout << "the number of the final pairs = " << result.size() << endl;
