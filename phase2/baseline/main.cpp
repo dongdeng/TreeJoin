@@ -95,7 +95,7 @@ int dfs(TreeNode *f1, TreeNode *f2, int **ans, int sum1, int sum2, int threshold
 	return ret;
 }
 
-int generatePostorderedString(TreeNode *root, char *filename) {
+int generatePostorderedString(TreeNode *root, const char *filename) {
 	cout << "start generating postordered string" << endl;
 	ofstream fout(filename);
 	int count = 0;
@@ -114,7 +114,7 @@ int generatePostorderedString(TreeNode *root, char *filename) {
 
 void findSimilarityJoin(int edThreshold, vector<EDJoinResult> &resultED) {
 	SimJoiner joiner;
-	unsigned q = 20;
+	unsigned q = 10;
 	//double jaccardThreshold = 0.8;
 	joiner.joinED("strings.txt", "strings.txt", q, edThreshold, resultED);
 }
@@ -141,7 +141,7 @@ int main(int argc, char **argv) {
 		int edThreshold = i;
 		cout << "the threshold = " << i << endl;
 		vector<EDJoinResult> resultED;
-		clock_t begin = clock();
+		clock_t begin = clock()	;
 		findSimilarityJoin(edThreshold, resultED);
 		clock_t end = clock();
 		cout << "the result of PassJoin = " << resultED.size() << endl;
@@ -149,7 +149,7 @@ int main(int argc, char **argv) {
 		vector<pair<int, int> > result;
 		begin = clock();
 		for (auto & i : resultED) {
-			if (treeED(f1->child[i.id1], f2->child[i.id2], edThreshold) <= edThreshold) {
+			if (i.id1 == i.id2 || treeED(f1->child[i.id1], f2->child[i.id2], edThreshold) <= edThreshold) {
 				result.push_back(make_pair(i.id1, i.id2));
 				//cout << i.id1 << ' ' << i.id2 << endl;
 			}

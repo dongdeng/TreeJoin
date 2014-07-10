@@ -29,7 +29,7 @@ public:
 	void readFiles(const char *filename1, const char *filename2);
 	void createInvertedListED(unsigned q, unsigned threshold);
 	void preprocessED(const char *filename1, const char *filename2, unsigned q, unsigned threshold);
-	void getResultED(unsigned q, unsigned threshold,  vector<int> &d0, vector<int> &d1, vector<EDJoinResult> &resultED);
+	void getResultED(unsigned q, unsigned threshold,  vector<EDJoinResult> &resultED);
 	int getED(TString &a, TString &b, int threshold);
 	int joinED(const char *filename1, const char *filename2, unsigned q, unsigned threshold, std::vector<EDJoinResult> &result);
 };

@@ -90,7 +90,7 @@ int dfs(TreeNode *f1, TreeNode *f2, int **ans, int sum1, int sum2, int threshold
 	return ret;
 }
 
-int generatePostorderedString(TreeNode *root, char *filename) {
+int generatePostorderedString(TreeNode *root, const char *filename) {
 	cout << "start generating postordered string" << endl;
 	ofstream fout(filename);
 	int count = 0;
@@ -209,25 +209,29 @@ void TreeJoin(vector<TreeNode*> &f, vector<TreeNode*> &ff, int threshold, vector
 		//get the candidates
 		vector<int> candidates;
 		unordered_map<int, bool> isDup;
-		for (int j = 0; j < k; ++j)
-			//if (flag[j] == 1) {
-				if (L.find((list[j].first)->eulerString) != L.end()) {
-					for (auto & l : L[(list[j].first)->eulerString]) {
-						//some pruning techniques
-						//PRUNING 1
- 						if (isDup.find(l) == isDup.end()) {
-							candidates.push_back(l);
-							isDup[l] = true;
+		if (num < threshold + 1) {
+			for (int j = 0; j <= i; ++j)
+				candidates.push_back(j);
+		}
+		else {
+			for (int j = 0; j < k; ++j)
+				//if (flag[j] == 1) {
+					if (L.find((list[j].first)->eulerString) != L.end()) {
+						for (auto & l : L[(list[j].first)->eulerString]) {
+							//some pruning techniques
+							//PRUNING 1
+	 						if (isDup.find(l) == isDup.end()) {
+								candidates.push_back(l);
+								isDup[l] = true;
+							}
+							//PRUNING 2
 						}
-						//PRUNING 2
 					}
-				}
-			//}
-		candidates.push_back(i);
+				//}
+			candidates.push_back(i);
+		}
 		for (auto & j : candidates) {
 			result.push_back(make_pair(i, j));
-			if (i != j)
-				result.push_back(make_pair(j, i));
 		}
 
 		//verification
@@ -294,7 +298,7 @@ int main(int argc, char **argv) {
 		cout << "the time of string ED = " << (end - begin) / CLOCKS_PER_SEC << endl;
 		begin = clock();
 		for (auto & j : result2)
-			if (treeED(f[j.first], ff[j.second], edThreshold) <= edThreshold)
+			if (j.first == j.second || treeED(f[j.first], ff[j.second], edThreshold) <= edThreshold)
 				result.push_back(make_pair(j.first, j.second));
 		end = clock();
 		cout << "the number of the final pairs = " << result.size() << endl;

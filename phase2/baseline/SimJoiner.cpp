@@ -55,12 +55,11 @@ unordered_map<string, int> m_map;
 
 void SimJoiner::createInvertedListED(unsigned q, unsigned threshold)
 {
-	int i = 0;
 	m_map.clear();
 	for(auto & s : m_str1) {
 	//for(int i = 0; i < m_str1.size(); ++ i) {
 		int length = s.length();
-		for (int j = 0; j <= length - q; ++j) {
+		for (int j = 0; j <= length - int(q); ++j) {
 			string sub = s.substr(j, q);
 			m_map[sub] += 1;
 		}
@@ -77,32 +76,34 @@ void SimJoiner::preprocessED(const char *filename1, const char *filename2, unsig
 }
 
 bool PairCompare(const string &a, const string &b) {
-	return m_map[a] < m_map[b];
+	return m_map[a] == m_map[b]?a > b: m_map[a] < m_map[b];
 }
 
-void SimJoiner::getResultED(unsigned q, unsigned threshold, vector<int> &d0, vector<int> &d1, vector<EDJoinResult> &resultED)
+void SimJoiner::getResultED(unsigned q, unsigned threshold, vector<EDJoinResult> &resultED)
 {
 	EDJoinResult rr;
 	int candidate = 0;
 	unordered_map<string, vector<int> > L;
-	for(int i = 0; i < m_str2.size(); ++i) {
+	for(int i = 0; i < int(m_str2.size()); ++i) {
 		//get the list
 		vector<string> list;
 		int length = m_str2[i].length();
-		for (int j = 0; j <= length - q; ++j) {
-			string sub = m_str2[i].substr(j, q);
-			list.push_back(sub);
+		if (length >= int(q)) {
+			for (int j = 0; j <= length - int(q); ++j) {
+				string sub = m_str2[i].substr(j, q);
+				list.push_back(sub);
+			}
+			sort(list.begin(), list.end(), PairCompare);
 		}
-		sort(list.begin(), list.end(), PairCompare);
 
 		//get the prefix
 		unordered_set<string> exist;
 		int m = list.size(), num = 0;
-		vector<int> flag(m, 0);
+		vector<int> flag(max(m, 1), 0);
 		flag[0] = 1;
 		int k;
 		for (k = 0; k < m; ++k) {
-			if (num == q * threshold + 1)
+			if (num == int(threshold) + 1)
 				break;
 			if (exist.find(list[k]) == exist.end()) {
 				++num;
@@ -114,8 +115,7 @@ void SimJoiner::getResultED(unsigned q, unsigned threshold, vector<int> &d0, vec
 		//get the candidates
 		vector<int> candidates;
 		unordered_map<int, bool> isDup;
-		if (num < q * threshold + 1) {
-			//cout << "wo cao" << endl;
+		if (num < int(threshold) + 1) {
 			for (int j = 0; j <= i; ++j)
 				candidates.push_back(j);
 		}
@@ -139,16 +139,11 @@ void SimJoiner::getResultED(unsigned q, unsigned threshold, vector<int> &d0, vec
 		candidate += candidates.size();
 		for (auto & j : candidates) {
 			int distance = getED(m_str1[j], m_str1[i], threshold);
-			if (distance <= threshold) {
+			if (distance <= int(threshold)) {
 				rr.id1 = i;
 				rr.id2 = j;
 				rr.s = distance;
 				resultED.push_back(rr);
-				if (i != j) {
-					rr.id1 = j;
-					rr.id2 = i;
-					resultED.push_back(rr);
-				}
 			}
 		}
 
@@ -211,8 +206,7 @@ int SimJoiner::joinED(const char *filename1, const char *filename2, unsigned q, 
 	preprocessED(filename1, filename2, q, threshold);
 
 	//get the result(for each one in m_str2)
-	vector<int> d0(m_len1), d1(m_len2);
-	getResultED(q, threshold, d0, d1, result);
+	getResultED(q, threshold, result);
 
 	//sort(result.begin(), result.end(), EDJoinResultCompare);
 
